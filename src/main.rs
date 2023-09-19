@@ -31,7 +31,6 @@ struct Cpu {
 
 fn monitor_cpu_usage(state: AppState) {
     let mut sys = System::new();
-    sys.refresh_cpu();
     loop {
         sys.refresh_cpu();
 
