@@ -1,0 +1,11 @@
+<div hx-get="/cpu-usage" hx-trigger="every 1s" hx-swap="outerHTML">
+    {% for cpu in cpus %}
+    <div class="flex justify-between mb-1 text-gray-200">
+        <span class="text-base font-medium">CPU {{ cpu.id }}</span>
+        <span class="text-base font-medium">{{ "{:0.1}"|format(cpu.usage) }}%</span>
+    </div>
+    <div class="w-full bg-gray-700 rounded-full mb-2">
+        <div class="p-2 bg-indigo-400 rounded-full" style="width: {{cpu.usage}}%"></div>
+    </div>
+    {% endfor %}
+</div>
