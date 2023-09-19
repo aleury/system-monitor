@@ -1,11 +1,20 @@
 use std::{
+    borrow::BorrowMut,
     error::Error,
     sync::{Arc, RwLock},
     time::Duration,
 };
 
 use askama::Template;
-use axum::{extract::State, response::IntoResponse, routing::get, Router, Server};
+use axum::{
+    extract::{
+        ws::{Message, WebSocket},
+        State, WebSocketUpgrade,
+    },
+    response::IntoResponse,
+    routing::get,
+    Router, Server,
+};
 use sysinfo::{CpuExt, System, SystemExt};
 use tokio::task::spawn_blocking;
 
@@ -83,7 +92,20 @@ async fn root_handler(State(state): State<AppState>) -> impl IntoResponse {
     IndexTemplate { cpus }
 }
 
-async fn get_cpu_usage(State(state): State<AppState>) -> impl IntoResponse {
-    let cpus = state.cpus.read().unwrap().clone();
-    CpuUsageTemplate { cpus }
+async fn get_cpu_usage(ws: WebSocketUpgrade, State(state): State<AppState>) -> impl IntoResponse {
+    ws.on_upgrade(|socket| websocket(socket, state))
+}
+
+async fn websocket(mut socket: WebSocket, state: AppState) {
+    loop {
+        let cpus = state.cpus.read().unwrap().clone();
+        let template = CpuUsageTemplate { cpus };
+        let html = template.render().unwrap();
+        socket
+            .borrow_mut()
+            .send(Message::Text(html))
+            .await
+            .unwrap_or_default();
+        tokio::time::sleep(Duration::from_secs(1)).await;
+    }
 }

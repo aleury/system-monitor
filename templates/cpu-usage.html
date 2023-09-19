@@ -1,4 +1,4 @@
-<div hx-get="/cpu-usage" hx-trigger="every 1s" hx-swap="outerHTML">
+<div id="cpu_usage">
     {% for cpu in cpus %}
     <div class="flex justify-between mb-1 text-gray-200">
         <span class="text-base font-medium">CPU {{ cpu.id }}</span>
